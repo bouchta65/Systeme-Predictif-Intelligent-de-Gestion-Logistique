@@ -1,0 +1,33 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: gestionlogistique-app
+    container_name: gestionlogistique-base
+
+  streamlit:
+    image: gestionlogistique-app
+    container_name: streamlit-app
+    depends_on:
+      - app
+    ports:
+      - "1234:1234"
+    command: streamlit run view/app.py --server.port=1234 --server.address=0.0.0.0
+    volumes:
+      - ./src:/src/src
+      - ./data:/src/data
+      - ./view:/src/view
+
+  jupyter:
+    image: gestionlogistique-app
+    container_name: jupyter-app
+    depends_on:
+      - app
+    ports:
+      - "8888:8888"
+    command: jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+    volumes:
+      - ./src:/src/src
+      - ./data:/src/data
+      - ./view:/src/view

@@ -1,0 +1,12 @@
+pyspark==3.5.1
+pandas 
+numpy
+scikit-learn
+matplotlib
+seaborn
+streamlit
+jupyter
+plotly
+altair
+jupyterlab
+requests
