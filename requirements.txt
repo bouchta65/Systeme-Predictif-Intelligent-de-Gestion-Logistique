@@ -10,3 +10,6 @@ plotly
 altair
 jupyterlab
 requests
+
+
+#ELK spark nlp airflow o spring lowel 
