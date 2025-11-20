@@ -18,6 +18,7 @@ services:
       - ./src:/src/src
       - ./data:/src/data
       - ./view:/src/view
+      - ./models:/src/models
 
   jupyter:
     image: gestionlogistique-app
@@ -31,3 +32,4 @@ services:
       - ./src:/src/src
       - ./data:/src/data
       - ./view:/src/view
+      - ./models:/src/models
