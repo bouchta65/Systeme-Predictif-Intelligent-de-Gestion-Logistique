@@ -1,23 +1,16 @@
-    # Utiliser une image officielle Python comme base
-    FROM python:3.11-slim
+FROM python:3.11-slim
 
-    # Définir le répertoire de travail dans le conteneur
-    WORKDIR /src
+WORKDIR /src
 
-    # Installer Java (nécessaire pour Spark) et quelques utilitaires
-    RUN apt-get update && \
-        apt-get install -y default-jre-headless && \
-        rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y default-jre-headless wget git curl && \
+    rm -rf /var/lib/apt/lists/*
 
-    # Installer PySpark et les librairies Python 
-    COPY requirements.txt /src/
-    
-    RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
-    # Copier le code source de ton projet dans le conteneur
-    COPY . /src
+COPY requirements.txt /src/
+RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
 
-    # Exposer le port pour Streamlit
-    EXPOSE 1234 8888
+COPY . /src
 
-    # Commande par défaut pour lancer ton application Streamlit
-    CMD ["streamlit", "run", "view/app.py", "--server.port=1234", "--server.address=0.0.0.0"]
+EXPOSE 8000 8888
+
+CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
