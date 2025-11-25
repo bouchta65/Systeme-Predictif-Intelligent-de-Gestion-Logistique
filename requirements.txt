@@ -12,13 +12,26 @@ seaborn>=0.12
 plotly>=6.0
 altair>=4.0,<6.0
 
+# Streamlit for dashboards
+streamlit>=1.28
+
 # Notebook / IDE
 jupyter>=1.0
 jupyterlab>=4.3
 
-# Web apps
-streamlit==1.26.1
-
 # Networking / API
 requests>=2.32
 
+# API
+fastapi>=0.100
+uvicorn[standard]>=0.23
+
+# WebSocket client and server
+websockets>=11.0
+
+# PostgreSQL / MongoDB connectors
+psycopg2-binary>=2.9
+pymongo>=4.5
+
+# Airflow
+apache-airflow>=2.7.0
