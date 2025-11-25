@@ -1,35 +1,61 @@
 services:
   app:
-    build: 
-      context: .
-      dockerfile: Dockerfile
+    build: .
     image: gestionlogistique-app
-    container_name: gestionlogistique-base
-
-  streamlit:
-    image: gestionlogistique-app
-    container_name: streamlit-app
-    depends_on:
-      - app
-    ports:
-      - "1234:1234"
-    command: streamlit run view/app.py --server.port=1234 --server.address=0.0.0.0
     volumes:
       - ./src:/src/src
       - ./data:/src/data
-      - ./view:/src/view
       - ./models:/src/models
+
+  postgres:
+    image: postgres:15
+    container_name: gestionlogistique-postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: dataco
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: postgres -c listen_addresses='*'
+
+  mongodb:
+    image: mongo:6
+    container_name: gestionlogistique-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./database/mongodb_init.py:/docker-entrypoint-initdb.d/init.py
+
+  fastapi:
+    image: gestionlogistique-app
+    depends_on: [app, postgres, mongodb]
+    ports: ["8000:8000"]
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+    volumes: [./src:/src/src]
+
+  bridge:
+    image: gestionlogistique-app
+    depends_on: [fastapi]
+    command: python src/bridge/tcp_bridge.py
+    volumes: [./src:/src/src]
+
+  spark-streaming:
+    image: gestionlogistique-app
+    depends_on: [bridge, postgres, mongodb]
+    command: spark-submit --packages org.postgresql:postgresql:42.5.0,org.mongodb.spark:mongo-spark-connector_2.12:10.3.0 src/streaming/streaming_job.py
+    volumes: [./src:/src/src, ./models:/src/models]
 
   jupyter:
     image: gestionlogistique-app
-    container_name: jupyter-app
-    depends_on:
-      - app
-    ports:
-      - "8888:8888"
+    depends_on: [postgres, mongodb]
+    ports: ["8888:8888"]
     command: jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
-    volumes:
-      - ./src:/src/src
-      - ./data:/src/data
-      - ./view:/src/view
-      - ./models:/src/models
+    volumes: [./src:/src/src, ./data:/src/data, ./models:/src/models]
+
+volumes:
+  postgres_data:
+  mongo_data:
